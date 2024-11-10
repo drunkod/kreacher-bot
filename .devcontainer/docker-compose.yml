@@ -1,0 +1,91 @@
+services:
+  db:
+    image: postgres:latest
+    restart: always
+    user: "$PGUSER"
+    volumes:
+      - ./container/postgres:/var/lib/postgresql/data
+    env_file:
+      - ./.env
+    ports:
+      - "$POSTGRES_PORT:$POSTGRES_PORT"
+    expose:
+      - $POSTGRES_PORT
+    networks:
+      - kreacher
+  cache:
+    image: redis:latest
+    restart: always
+    volumes:
+      - ./container/redis:/data
+    env_file:
+      - ./.env
+    command: redis-server --port $REDIS_PORT --loglevel warning --requirepass $REDIS_PASSWORD
+    ports:
+      - "$REDIS_PORT:$REDIS_PORT"
+    expose:
+      - $REDIS_PORT
+    networks:
+      - kreacher
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+    ports:
+      - "6060:80"
+    expose:
+      - 6060
+    networks:
+      - kreacher
+  telegram-bot-api:
+    container_name: telegram-bot-api
+    image: megurobot/telegram-bot-api:latest
+    restart: unless-stopped
+    environment:
+      USER_GID: 1000
+      USER_UID: 1000
+      TELEGRAM_API_ID: ${API_ID}
+      TELEGRAM_API_HASH: ${API_HASH}
+      TELEGRAM_STAT: true
+      TELEGRAM_LOCAL: true
+    env_file:
+      - .env
+    volumes:
+      - ./container/telegram-bot-api:/var/lib/telegram-bot-api
+    networks:
+      telegram-bot-api:
+    ports:
+      - "8081:8081"
+      - "8082:8082"
+  app:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - db
+      - cache
+    networks:
+      - kreacher
+
+networks:
+  kreacher:
+    driver: bridge
+  telegram-bot-api:
+    name: telegram-bot-api
+
+volumes:
+  postgres:
+    driver: local
+  redis:
+    driver: local
+  pgadmin:
+    driver: local
+  telegram-bot-api:
+    name: telegram-bot-api
+    external: true

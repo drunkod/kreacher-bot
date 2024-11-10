@@ -1,14 +1,23 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/go
 {
-	"name": "Go",
+	
+		"name": "Kreacher Bot Development",
+		"dockerComposeFile": "../docker-compose.yml",
+		"service": "app",
+		"workspaceFolder": "/workspace",
+		"customizations": {
+		  "vscode": {
+			"extensions": [
+			  "golang.go",
+			  "ms-azuretools.vscode-docker"
+			]
+		  }
+		},
+		"remoteUser": "root",
+		// "postCreateCommand": "go mod download"
+	  
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/go:latest",
-	"features": {
-		"ghcr.io/devcontainers/features/sshd": {
-			"version": "latest"
-		}
-	}
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
